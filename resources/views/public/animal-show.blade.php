@@ -2,163 +2,201 @@
 
 @section('content')
 <div class="container my-5">
-    <h1 class="text-center mb-4">Animais Disponíveis para Adoção</h1>
+    {{-- Botão voltar --}}
+    <div class="mb-4">
+        <a href="{{ route('animals') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar para lista de animais
+        </a>
+    </div>
 
-    {{-- =========================
-         FILTRO DE BUSCA / ADOÇÃO
-       ========================== --}}
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ route('animals') }}">
-                <div class="row g-2">
-                    {{-- Busca por nome/descrição --}}
-                    <div class="col-md-4">
-                        <input
-                            type="text"
-                            name="q"
-                            class="form-control"
-                            placeholder="Buscar por nome ou descrição"
-                            value="{{ request('q') }}"
-                        >
-                    </div>
+    <div class="row">
+        {{-- FOTO / IMAGEM --}}
+        <div class="col-md-6">
+            @if($animal->photo)
+                <img src="{{ $animal->photo }}" 
+                     class="img-fluid rounded shadow mb-4" 
+                     alt="{{ $animal->name }}"
+                     style="width: 100%; max-height: 500px; object-fit: cover;">
+            @else
+                <div class="bg-secondary d-flex align-items-center justify-content-center rounded shadow mb-4"
+                     style="width: 100%; height: 400px;">
+                    <i class="fas fa-paw fa-5x text-white"></i>
+                </div>
+            @endif
+        </div>
 
-                    {{-- Espécie --}}
-                    <div class="col-md-2">
-                        <select name="species" class="form-select">
-                            <option value="">Espécie</option>
-                            <option value="cachorro" {{ request('species') == 'cachorro' ? 'selected' : '' }}>Cachorro</option>
-                            <option value="gato" {{ request('species') == 'gato' ? 'selected' : '' }}>Gato</option>
-                            {{-- Se tiver outras espécies no teu sistema, pode adicionar aqui --}}
-                        </select>
-                    </div>
+        {{-- INFORMAÇÕES DO ANIMAL --}}
+        <div class="col-md-6">
+            <h1 class="mb-3">{{ $animal->name }}</h1>
 
-                    {{-- Sexo --}}
-                    <div class="col-md-2">
-                        <select name="gender" class="form-select">
-                            <option value="">Sexo</option>
-                            <option value="macho" {{ request('gender') == 'macho' ? 'selected' : '' }}>Macho</option>
-                            <option value="fêmea" {{ request('gender') == 'fêmea' ? 'selected' : '' }}>Fêmea</option>
-                        </select>
-                    </div>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle"></i> Informações
+                    </h5>
 
-                    {{-- Porte --}}
-                    <div class="col-md-2">
-                        <select name="size" class="form-select">
-                            <option value="">Porte</option>
-                            <option value="pequeno" {{ request('size') == 'pequeno' ? 'selected' : '' }}>Pequeno</option>
-                            <option value="médio" {{ request('size') == 'médio' ? 'selected' : '' }}>Médio</option>
-                            <option value="grande" {{ request('size') == 'grande' ? 'selected' : '' }}>Grande</option>
-                        </select>
-                    </div>
+                    <p class="mb-2">
+                        <strong><i class="fas fa-paw"></i> Espécie:</strong>
+                        {{ ucfirst($animal->species) }}
+                    </p>
 
-                    {{-- Castrado --}}
-                    <div class="col-md-2">
-                        <select name="castrated" class="form-select">
-                            <option value="">Castrado?</option>
-                            <option value="1" {{ request('castrated') === '1' ? 'selected' : '' }}>Sim</option>
-                            <option value="0" {{ request('castrated') === '0' ? 'selected' : '' }}>Não</option>
-                        </select>
+                    @if($animal->breed)
+                        <p class="mb-2">
+                            <strong><i class="fas fa-dog"></i> Raça:</strong>
+                            {{ $animal->breed }}
+                        </p>
+                    @endif
+
+                    @if($animal->age)
+                        <p class="mb-2">
+                            <strong><i class="fas fa-calendar"></i> Idade:</strong>
+                            @switch($animal->age)
+                                @case('filhote')
+                                    Filhote
+                                    @break
+                                @case('adulto')
+                                    Adulto
+                                    @break
+                                @case('idoso')
+                                    Idoso
+                                    @break
+                                @default
+                                    {{ $animal->age }}
+                            @endswitch
+                        </p>
+                    @endif
+
+                    <p class="mb-2">
+                        <strong>
+                            <i class="fas fa-{{ $animal->gender == 'macho' ? 'mars' : 'venus' }}"></i> Sexo:
+                        </strong>
+                        {{ ucfirst($animal->gender) }}
+                    </p>
+
+                    @if($animal->size)
+                        <p class="mb-2">
+                            <strong><i class="fas fa-ruler"></i> Porte:</strong>
+                            {{ ucfirst($animal->size) }}
+                        </p>
+                    @endif
+
+                    @if($animal->color)
+                        <p class="mb-2">
+                            <strong><i class="fas fa-palette"></i> Cor:</strong>
+                            {{ $animal->color }}
+                        </p>
+                    @endif
+                </div>
+            </div>
+
+            {{-- SAÚDE --}}
+            @if($animal->castrated || $animal->vaccinated || $animal->dewormed || $animal->special_needs)
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-heartbeat"></i> Saúde
+                        </h5>
+
+                        @if($animal->castrated)
+                            <p class="mb-1">
+                                <i class="fas fa-check text-success"></i> Castrado
+                            </p>
+                        @endif
+
+                        @if($animal->vaccinated)
+                            <p class="mb-1">
+                                <i class="fas fa-check text-success"></i> Vacinado
+                            </p>
+                        @endif
+
+                        @if($animal->dewormed)
+                            <p class="mb-1">
+                                <i class="fas fa-check text-success"></i> Vermifugado
+                            </p>
+                        @endif
+
+                        @if($animal->special_needs)
+                            <p class="mb-1">
+                                <i class="fas fa-exclamation-triangle text-warning"></i>
+                                Necessidades Especiais
+                            </p>
+                        @endif
                     </div>
                 </div>
+            @endif
 
-                <div class="row g-2 mt-2">
-                    {{-- Vacinado --}}
-                    <div class="col-md-2">
-                        <select name="vaccinated" class="form-select">
-                            <option value="">Vacinado?</option>
-                            <option value="1" {{ request('vaccinated') === '1' ? 'selected' : '' }}>Sim</option>
-                            <option value="0" {{ request('vaccinated') === '0' ? 'selected' : '' }}>Não</option>
-                        </select>
-                    </div>
-
-                    {{-- Necessidades especiais --}}
-                    <div class="col-md-2">
-                        <select name="special_needs" class="form-select">
-                            <option value="">Necess. Especiais?</option>
-                            <option value="1" {{ request('special_needs') === '1' ? 'selected' : '' }}>Sim</option>
-                            <option value="0" {{ request('special_needs') === '0' ? 'selected' : '' }}>Não</option>
-                        </select>
-                    </div>
-
-                    {{-- Idade mínima --}}
-                    <div class="col-md-2">
-                        <input
-                            type="number"
-                            name="min_age"
-                            class="form-control"
-                            placeholder="Idade mín."
-                            min="0"
-                            value="{{ request('min_age') }}"
-                        >
-                    </div>
-
-                    {{-- Idade máxima --}}
-                    <div class="col-md-2">
-                        <input
-                            type="number"
-                            name="max_age"
-                            class="form-control"
-                            placeholder="Idade máx."
-                            min="0"
-                            value="{{ request('max_age') }}"
-                        >
-                    </div>
-
-                    {{-- Botões --}}
-                    <div class="col-md-4 d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary me-2">
-                            <i class="fas fa-filter"></i> Filtrar
-                        </button>
-                        <a href="{{ route('animals') }}" class="btn btn-outline-secondary">
-                            Limpar
-                        </a>
+            {{-- DESCRIÇÃO --}}
+            @if($animal->description)
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-align-left"></i> Sobre {{ $animal->name }}
+                        </h5>
+                        <p class="mb-0">{{ $animal->description }}</p>
                     </div>
                 </div>
-            </form>
+            @endif
         </div>
     </div>
 
-    {{-- =========================
-         LISTAGEM DOS ANIMAIS
-       ========================== --}}
-    <div class="row">
-        @forelse($animals as $animal)
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                @if($animal->photo)
-                <img src="{{ $animal->photo }}" class="card-img-top" alt="{{ $animal->name }}" style="height: 250px; object-fit: cover;">
-                @else
-                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 250px;">
-                    <i class="fas fa-paw fa-4x text-white"></i>
-                </div>
-                @endif
+    {{-- FORMULÁRIO DE ADOÇÃO --}}
+    <div class="row mt-4">
+        <div class="col-lg-6 mx-auto">
+            <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">{{ $animal->name }}</h5>
-                    <p class="card-text">
-                        <i class="fas fa-paw"></i> {{ ucfirst($animal->species) }} | 
-                        <i class="fas fa-{{ $animal->gender == 'macho' ? 'mars' : 'venus' }}"></i> {{ ucfirst($animal->gender) }}<br>
-                        @if($animal->age)
-                        <i class="fas fa-calendar"></i> {{ $animal->age }} {{ $animal->age == 1 ? 'ano' : 'anos' }}<br>
-                        @endif
-                        @if($animal->size)
-                        <i class="fas fa-ruler"></i> Porte {{ ucfirst($animal->size) }}
-                        @endif
-                    </p>
-                    <p class="card-text">{{ \Illuminate\Support\Str::limit($animal->description, 100) }}</p>
-                    <a href="{{ route('animal.show', $animal->id) }}" class="btn btn-primary btn-sm w-100">
-                        <i class="fas fa-heart"></i> Ver Detalhes e Adotar
-                    </a>
+                    <h3 class="mb-3">Solicitar Adoção</h3>
+
+                    @auth
+                        <form method="POST" action="{{ route('adoption.request', $animal->id) }}">
+                            @csrf
+
+                            <div class="mb-3">
+                                <input type="text" name="full_name" class="form-control"
+                                       placeholder="Nome Completo" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <input type="email" name="email" class="form-control"
+                                       placeholder="Email" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <input type="text" name="phone" class="form-control"
+                                       placeholder="Telefone" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <input type="text" name="city_state" class="form-control"
+                                       placeholder="Cidade/Estado" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <select name="housing_type" class="form-control" required>
+                                    <option value="">Tipo de Moradia</option>
+                                    <option value="casa">Casa</option>
+                                    <option value="apartamento">Apartamento</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <textarea name="message" class="form-control"
+                                          placeholder="Mensagem (opcional)"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                Enviar Pedido
+                            </button>
+                        </form>
+                    @else
+                        <p class="alert alert-info mb-0">
+                            Faça
+                            <a href="{{ route('login') }}" class="alert-link">login</a>
+                            para solicitar adoção de {{ $animal->name }}.
+                        </p>
+                    @endauth
                 </div>
             </div>
         </div>
-        @empty
-        <p class="text-center">Nenhum animal encontrado com os filtros selecionados.</p>
-        @endforelse
-    </div>
-
-    {{-- Mantém os filtros na paginação --}}
-    <div class="mt-3">
-        {{ $animals->withQueryString()->links() }}
     </div>
 </div>
 @endsection

@@ -8,11 +8,11 @@ use Illuminate\Http\Request;
 
 class DonationController extends Controller
 {
-
     public function index()
     {
         $donations = Donation::latest()->paginate(15);
-        $total = Donation::sum('amount');
+        $total     = Donation::sum('amount');
+
         return view('admin.donations.index', compact('donations', 'total'));
     }
 
@@ -24,16 +24,18 @@ class DonationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'date' => 'required|date',
-            'amount' => 'required|numeric|min:0',
-            'donation_type' => 'required|string|max:255',
-            'donor_name' => 'nullable|string|max:255',
-            'notes' => 'nullable|string'
+            'date'        => 'required|date',
+            'type'        => 'required|in:dinheiro,racao,medicamento,outros',
+            'amount'      => 'required|numeric|min:0',
+            'donor_name'  => 'nullable|string|max:255',
+            'donor_email' => 'nullable|email|max:255',
+            'description' => 'nullable|string',
         ]);
 
         Donation::create($validated);
 
-        return redirect()->route('admin.donations.index')
+        return redirect()
+            ->route('admin.donations.index')
             ->with('success', 'Doação registrada com sucesso!');
     }
 
@@ -45,23 +47,27 @@ class DonationController extends Controller
     public function update(Request $request, Donation $donation)
     {
         $validated = $request->validate([
-            'date' => 'required|date',
-            'amount' => 'required|numeric|min:0',
-            'donation_type' => 'required|string|max:255',
-            'donor_name' => 'nullable|string|max:255',
-            'notes' => 'nullable|string'
+            'date'        => 'required|date',
+            'type'        => 'required|in:dinheiro,racao,medicamento,outros',
+            'amount'      => 'required|numeric|min:0',
+            'donor_name'  => 'nullable|string|max:255',
+            'donor_email' => 'nullable|email|max:255',
+            'description' => 'nullable|string',
         ]);
 
         $donation->update($validated);
 
-        return redirect()->route('admin.donations.index')
+        return redirect()
+            ->route('admin.donations.index')
             ->with('success', 'Doação atualizada com sucesso!');
     }
 
     public function destroy(Donation $donation)
     {
         $donation->delete();
-        return redirect()->route('admin.donations.index')
+
+        return redirect()
+            ->route('admin.donations.index')
             ->with('success', 'Doação removida com sucesso!');
     }
 }
